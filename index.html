@@ -2054,5 +2054,22 @@
             }
         });
     </script>
+    <script>
+        // 1. Tell the app where your kitchen is
+        const KITCHEN_URL = "https://script.google.com/macros/s/AKfycbz2EngGgKSZw54N1KY1WdqWrQwFOhv5KtWHWH0l0RcIgcE_25Fq-NoegFCS3HFnOxSK/exec";
+
+        // 2. How to fetch vendors
+        async function getVendors() {
+            const response = await fetch(`${KITCHEN_URL}?sheet=Vendors`);
+            return await response.json(); // Returns pizza, burgers, etc.
+        }
+
+        // 3. Update the SOS button
+        document.getElementById('sosBtn').onclick = async function() {
+            const vendors = await getVendors();
+            console.log("Available vendors:", vendors); // View in browser console (F12)
+            alert(`Found ${vendors.length} vendors! Check console for details.`);
+        };
+    </script>
 </body>
 </html>
