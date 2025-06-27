@@ -16,6 +16,7 @@
             --light-gray: #f5f7fa;
             --dark-gray: #333333;
             --emergency-red: #ff4d4d;
+            --success-green: #4CAF50;
         }
         
         * {
@@ -891,6 +892,28 @@
             }
         }
         
+        /* API Status Indicator */
+        .api-status {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            padding: 10px 15px;
+            border-radius: 20px;
+            font-weight: 500;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+            z-index: 2000;
+        }
+        
+        .api-status.connected {
+            background-color: var(--success-green);
+            color: white;
+        }
+        
+        .api-status.disconnected {
+            background-color: var(--emergency-red);
+            color: white;
+        }
+        
         /* Responsive Design */
         @media (max-width: 768px) {
             .header-container {
@@ -932,6 +955,11 @@
     </style>
 </head>
 <body>
+    <!-- API Connection Status -->
+    <div class="api-status connected">
+        <i class="fas fa-plug"></i> Backend API: Connected
+    </div>
+
     <!-- Header -->
     <header>
         <div class="header-container">
@@ -1243,7 +1271,7 @@
                 </div>
                 <div id="selectedServiceDisplay" style="text-align: center; margin: 1.5rem 0; font-weight: bold;"></div>
                 <div style="text-align: center;">
-                    <button class="btn btn-primary" onclick="findVendors()" id="findVendorsBtn" disabled>
+                    <button class="btn btn-primary" onclick="findEmergencyVendors()" id="findVendorsBtn" disabled>
                         <i class="fas fa-search"></i> Find Vendors (60 sec)
                     </button>
                 </div>
@@ -1292,7 +1320,7 @@
                 <div style="display: flex; gap: 1rem; margin-top: 1rem;">
                     <button class="btn btn-primary"><i class="fas fa-phone-alt"></i> Call Now</button>
                     <button class="btn btn-outline" style="color: #0047AB; border-color: #0047AB;"><i class="fab fa-whatsapp"></i> WhatsApp</button>
-                    <button class="btn btn-primary" onclick="bookVendor()"><i class="fas fa-calendar-check"></i> Book Now</button>
+                    <button class="btn btn-primary" onclick="saveBooking()"><i class="fas fa-calendar-check"></i> Book Now</button>
                 </div>
                 
                 <h4 style="margin-top: 2rem;">Payment Options</h4>
@@ -1627,6 +1655,14 @@
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
+        // Configuration
+        const API_URL = "https://script.google.com/macros/s/AKfycbzjovUj4bFizuAEHrKOnDXkIoACWCGCXxmm--oJNHOFXpeljCJqMKw3KZVj3muEKw3Pew/exec";
+        let selectedService = null;
+        let selectedEventType = null;
+        let selectedServices = [];
+        let selectedPaymentMethod = null;
+        let currentVendor = null;
+        
         // DOM Elements
         const sosBtn = document.getElementById('sosBtn');
         const sosModal = document.getElementById('sosModal');
@@ -1637,12 +1673,6 @@
         const findVendorsBtn = document.getElementById('findVendorsBtn');
         const selectedServiceDisplay = document.getElementById('selectedServiceDisplay');
         const sosFooterBtn = document.getElementById('sosFooterBtn');
-        
-        // Selected service variable
-        let selectedService = null;
-        let selectedEventType = null;
-        let selectedServices = [];
-        let selectedPaymentMethod = null;
         
         // Initialize charts when admin panel is shown
         function initAdminCharts() {
@@ -1709,6 +1739,171 @@
             });
         }
         
+        // Get vendors for SOS mode
+        async function findEmergencyVendors(service, location = "Varanasi") {
+            try {
+                findVendorsBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Finding vendors...';
+                findVendorsBtn.disabled = true;
+                
+                const response = await fetch(`${API_URL}?action=getVendors&service=${service}&location=${location}`);
+                const vendors = await response.json();
+                
+                if (vendors && vendors.length > 0) {
+                    // Show success message
+                    selectedServiceDisplay.innerHTML = `✅ Found ${vendors.length} verified ${service} vendors!`;
+                    selectedServiceDisplay.style.color = 'green';
+                    
+                    // Change button to show booking options
+                    findVendorsBtn.innerHTML = '<i class="fas fa-user-check"></i> View Vendor Options';
+                    findVendorsBtn.disabled = false;
+                    findVendorsBtn.onclick = () => {
+                        // Show the first vendor as an example
+                        showVendor(vendors[0].type.toLowerCase());
+                        sosModal.style.display = 'none';
+                    };
+                } else {
+                    selectedServiceDisplay.innerHTML = '⚠️ No vendors found. Please try another service.';
+                    selectedServiceDisplay.style.color = 'orange';
+                    findVendorsBtn.innerHTML = '<i class="fas fa-search"></i> Find Vendors';
+                    findVendorsBtn.disabled = false;
+                }
+            } catch (error) {
+                console.error('Error fetching vendors:', error);
+                selectedServiceDisplay.innerHTML = '⚠️ Error connecting to service. Please try again.';
+                selectedServiceDisplay.style.color = 'red';
+                findVendorsBtn.innerHTML = '<i class="fas fa-search"></i> Find Vendors';
+                findVendorsBtn.disabled = false;
+            }
+        }
+        
+        // Save booking
+        async function saveBooking() {
+            if (!selectedPaymentMethod) {
+                alert('Please select a payment method');
+                return;
+            }
+            
+            // Show processing
+            const bookBtn = document.querySelector('.btn-primary[onclick="saveBooking()"]');
+            const originalText = bookBtn.innerHTML;
+            bookBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+            bookBtn.disabled = true;
+            
+            try {
+                const bookingData = {
+                    customer: "Demo User",
+                    vendor: document.getElementById('vendorTitle').textContent,
+                    service: selectedService,
+                    status: "confirmed",
+                    amount: "₹85,000", // Example amount
+                    date: new Date().toISOString(),
+                    paymentMethod: selectedPaymentMethod
+                };
+                
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        action: "saveBooking",
+                        ...bookingData
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.status === "success") {
+                    // Show success
+                    bookBtn.innerHTML = '<i class="fas fa-check"></i> Booked Successfully!';
+                    bookBtn.style.backgroundColor = '#4CAF50';
+                    
+                    // Close modal after delay
+                    setTimeout(() => {
+                        closeModal('vendorModal');
+                        bookBtn.innerHTML = originalText;
+                        bookBtn.style.backgroundColor = '';
+                        bookBtn.disabled = false;
+                        
+                        // Show confetti
+                        createConfetti();
+                        
+                        // Show success notification
+                        showNotification('Booking confirmed! Vendor has been notified.', 'success');
+                    }, 1500);
+                } else {
+                    throw new Error(result.message || 'Booking failed');
+                }
+            } catch (error) {
+                console.error('Error saving booking:', error);
+                bookBtn.innerHTML = '<i class="fas fa-times"></i> Booking Failed';
+                bookBtn.style.backgroundColor = '#f44336';
+                
+                setTimeout(() => {
+                    bookBtn.innerHTML = originalText;
+                    bookBtn.style.backgroundColor = '';
+                    bookBtn.disabled = false;
+                }, 2000);
+            }
+        }
+        
+        // Show notification
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.innerHTML = `
+                <div class="notification-content">
+                    <i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'}"></i>
+                    ${message}
+                </div>
+            `;
+            
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.style.opacity = '0';
+                setTimeout(() => {
+                    notification.remove();
+                }, 500);
+            }, 3000);
+            
+            // Add styles for notifications
+            const style = document.createElement('style');
+            style.innerHTML = `
+                .notification {
+                    position: fixed;
+                    top: 20px;
+                    right: 20px;
+                    padding: 15px 20px;
+                    border-radius: 8px;
+                    background: white;
+                    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+                    z-index: 2000;
+                    transition: all 0.3s ease;
+                    transform: translateX(100%);
+                    animation: slideIn 0.3s forwards;
+                }
+                
+                .notification.success {
+                    background: #4CAF50;
+                    color: white;
+                }
+                
+                .notification.error {
+                    background: #f44336;
+                    color: white;
+                }
+                
+                .notification.info {
+                    background: #2196F3;
+                    color: white;
+                }
+                
+                @keyframes slideIn {
+                    to { transform: translateX(0); }
+                }
+            `;
+            document.head.appendChild(style);
+        }
+        
         // Open SOS modal
         sosBtn.addEventListener('click', () => {
             sosModal.style.display = 'flex';
@@ -1730,11 +1925,6 @@
         // Close modal function
         function closeModal(modalId) {
             document.getElementById(modalId).style.display = 'none';
-            
-            // Show confetti when booking is completed
-            if(modalId === 'vendorModal') {
-                createConfetti();
-            }
         }
         
         // Select service function
@@ -1793,64 +1983,6 @@
             }
         }
         
-        // Find vendors function
-        function findVendors() {
-            if (!selectedService) return;
-            
-            // Simulate AI processing
-            findVendorsBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Finding vendors...';
-            
-            setTimeout(() => {
-                // Show success message
-                selectedServiceDisplay.innerHTML = `✅ Found 3 verified ${selectedService} vendors!`;
-                selectedServiceDisplay.style.color = 'green';
-                
-                // Change button to show booking options
-                findVendorsBtn.innerHTML = '<i class="fas fa-user-check"></i> View Vendor Options';
-                findVendorsBtn.onclick = () => {
-                    showVendor(selectedService.toLowerCase());
-                    sosModal.style.display = 'none';
-                };
-            }, 2000);
-        }
-        
-        // Generate AI plan
-        function generatePlan() {
-            if (!selectedEventType || !document.getElementById('eventDate').value || 
-                !document.getElementById('budgetRange').value || selectedServices.length === 0) {
-                alert('Please complete all steps before generating your plan');
-                return;
-            }
-            
-            const eventDate = new Date(document.getElementById('eventDate').value);
-            const options = { year: 'numeric', month: 'long', day: 'numeric' };
-            const formattedDate = eventDate.toLocaleDateString('en-US', options);
-            
-            // Show loading
-            const generateBtn = document.querySelector('.btn-large');
-            const originalText = generateBtn.innerHTML;
-            generateBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating AI Plan...';
-            
-            setTimeout(() => {
-                // Show success
-                generateBtn.innerHTML = '<i class="fas fa-check"></i> Plan Generated!';
-                generateBtn.style.backgroundColor = '#4CAF50';
-                
-                // Close modal after delay
-                setTimeout(() => {
-                    closeModal('plannerModal');
-                    generateBtn.innerHTML = originalText;
-                    generateBtn.style.backgroundColor = '';
-                    
-                    // Show confetti
-                    createConfetti();
-                    
-                    // Show success message
-                    alert(`Your ${selectedEventType} event plan for ${formattedDate} has been generated!\n\nServices included: ${selectedServices.join(', ')}\n\nOur AI Co-Planner will now help you book each service.`);
-                }, 1500);
-            }, 3000);
-        }
-        
         // Show vendor function
         function showVendor(type) {
             vendorModal.style.display = 'flex';
@@ -1873,6 +2005,11 @@
                     vendorResponse.textContent = '23 minutes';
                     vendorCompletion.textContent = '98%';
                     vendorDescription.textContent = 'Delight Caterers specializes in authentic North Indian, South Indian, and Continental cuisine. With over 12 years of experience, we\'ve catered to more than 850 events including weddings, corporate functions, and private parties. Our team uses only the freshest ingredients and offers customizable menus to suit your preferences and budget.';
+                    currentVendor = {
+                        name: 'Delight Caterers',
+                        type: 'Caterer',
+                        location: 'Varanasi'
+                    };
                     break;
                 case 'decorator':
                     vendorName.innerHTML = '<i class="fas fa-paint-brush"></i> Decorating Service';
@@ -1882,6 +2019,11 @@
                     vendorResponse.textContent = '18 minutes';
                     vendorCompletion.textContent = '99%';
                     vendorDescription.textContent = 'Royal Decorators transforms venues with elegant decorations for weddings, engagements, and corporate galas. Our team of creative designers specializes in floral arrangements, lighting, and thematic decor. We handle everything from intimate gatherings to large-scale events with 500+ guests, ensuring each detail reflects your unique vision.';
+                    currentVendor = {
+                        name: 'Royal Decorators',
+                        type: 'Decorator',
+                        location: 'Delhi'
+                    };
                     break;
                 case 'band':
                     vendorName.innerHTML = '<i class="fas fa-music"></i> Entertainment Service';
@@ -1891,6 +2033,11 @@
                     vendorResponse.textContent = '35 minutes';
                     vendorCompletion.textContent = '96%';
                     vendorDescription.textContent = 'Melody Band brings energy and excitement to your events with live performances spanning Bollywood hits, classical fusion, and western music. Our 8-piece ensemble features talented vocalists and instrumentalists who have performed at over 300 events across India. Customize your playlist and create unforgettable musical memories for your guests.';
+                    currentVendor = {
+                        name: 'Melody Band',
+                        type: 'Entertainment',
+                        location: 'Mumbai'
+                    };
                     break;
                 case 'pandit':
                     vendorName.innerHTML = '<i class="fas fa-pray"></i> Pandit Service';
@@ -1900,6 +2047,11 @@
                     vendorResponse.textContent = '42 minutes';
                     vendorCompletion.textContent = '100%';
                     vendorDescription.textContent = 'Shastri Panditji has performed over 500+ wedding ceremonies with complete Vedic rituals. Specializing in all Hindu ceremonies including weddings, griha pravesh, and other sanskars. Fluent in Hindi, Sanskrit, and English with clear explanations of all rituals. Available for ceremonies across North India.';
+                    currentVendor = {
+                        name: 'Shastri Panditji',
+                        type: 'Pandit',
+                        location: 'Varanasi'
+                    };
                     break;
                 default:
                     vendorTitle.textContent = 'Vendor Details';
@@ -1941,35 +2093,41 @@
             });
         }
         
-        // Book vendor function
-        function bookVendor() {
-            if (!selectedPaymentMethod) {
-                alert('Please select a payment method');
+        // Generate AI plan
+        function generatePlan() {
+            if (!selectedEventType || !document.getElementById('eventDate').value || 
+                !document.getElementById('budgetRange').value || selectedServices.length === 0) {
+                alert('Please complete all steps before generating your plan');
                 return;
             }
             
-            // Show processing
-            const bookBtn = document.querySelector('.btn-primary[onclick="bookVendor()"]');
-            const originalText = bookBtn.innerHTML;
-            bookBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
-            bookBtn.disabled = true;
+            const eventDate = new Date(document.getElementById('eventDate').value);
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            const formattedDate = eventDate.toLocaleDateString('en-US', options);
+            
+            // Show loading
+            const generateBtn = document.querySelector('.btn-large');
+            const originalText = generateBtn.innerHTML;
+            generateBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating AI Plan...';
             
             setTimeout(() => {
                 // Show success
-                bookBtn.innerHTML = '<i class="fas fa-check"></i> Booked Successfully!';
-                bookBtn.style.backgroundColor = '#4CAF50';
+                generateBtn.innerHTML = '<i class="fas fa-check"></i> Plan Generated!';
+                generateBtn.style.backgroundColor = '#4CAF50';
                 
                 // Close modal after delay
                 setTimeout(() => {
-                    closeModal('vendorModal');
-                    bookBtn.innerHTML = originalText;
-                    bookBtn.style.backgroundColor = '';
-                    bookBtn.disabled = false;
+                    closeModal('plannerModal');
+                    generateBtn.innerHTML = originalText;
+                    generateBtn.style.backgroundColor = '';
                     
                     // Show confetti
                     createConfetti();
+                    
+                    // Show success message
+                    showNotification(`Your ${selectedEventType} event plan for ${formattedDate} has been generated!`, 'success');
                 }, 1500);
-            }, 2000);
+            }, 3000);
         }
         
         // Create confetti effect
@@ -2014,24 +2172,24 @@
         
         // Simulate missed call booking
         function initiateMissedCallBooking() {
-            alert('Missed call received! Our team will call you back within 2 minutes to complete your booking.');
+            showNotification('Missed call received! Our team will call you back within 2 minutes.', 'info');
         }
         
         // Show panic button
         function showPanicButton() {
             if (confirm('Are you sure you want to trigger the panic button? This will initiate automatic refunds for affected customers.')) {
-                alert('Panic button activated! Auto-refund process initiated for all affected bookings.');
+                showNotification('Panic button activated! Auto-refund process initiated.', 'info');
             }
         }
         
         // Switch language
         function switchLanguage(lang) {
             if (lang === 'hindi') {
-                alert('Language switched to Hindi. Actual implementation would translate the interface.');
+                showNotification('Language switched to Hindi', 'info');
                 document.querySelector('.lang-btn.hindi').classList.add('active');
                 document.querySelector('.lang-btn:not(.hindi)').classList.remove('active');
             } else {
-                alert('Language switched to English');
+                showNotification('Language switched to English', 'info');
                 document.querySelector('.lang-btn:not(.hindi)').classList.add('active');
                 document.querySelector('.lang-btn.hindi').classList.remove('active');
             }
@@ -2052,24 +2210,13 @@
             if(urlParams.has('admin')) {
                 showAdminPanel();
             }
+            
+            // Simulate API connection status
+            setTimeout(() => {
+                document.querySelector('.api-status').textContent = '✓ Backend API: Connected';
+                document.querySelector('.api-status').classList.add('connected');
+            }, 1000);
         });
-    </script>
-    <script>
-        // 1. Tell the app where your kitchen is
-        const KITCHEN_URL = "https://script.google.com/macros/s/AKfycbz2EngGgKSZw54N1KY1WdqWrQwFOhv5KtWHWH0l0RcIgcE_25Fq-NoegFCS3HFnOxSK/exec";
-
-        // 2. How to fetch vendors
-        async function getVendors() {
-            const response = await fetch(`${KITCHEN_URL}?sheet=Vendors`);
-            return await response.json(); // Returns pizza, burgers, etc.
-        }
-
-        // 3. Update the SOS button
-        document.getElementById('sosBtn').onclick = async function() {
-            const vendors = await getVendors();
-            console.log("Available vendors:", vendors); // View in browser console (F12)
-            alert(`Found ${vendors.length} vendors! Check console for details.`);
-        };
     </script>
 </body>
 </html>
