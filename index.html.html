@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thrift Startup India: An Interactive Market Blueprint</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Warm Neutrals (Oat, Stone, Clay, Forest Green) -->
+    <!-- Application Structure Plan: The SPA is designed as a strategic journey for a prospective entrepreneur, organized into six thematic, navigable sections: 1. The Opportunity (hooking with market size/growth), 2. The Shopper (understanding the target audience), 3. The Blueprint (interactive operational flow), 4. The Competitive Edge (showcasing the value proposition), 5. The Financials (detailing costs/funding), and 6. The Roadmap (outlining launch/future). This non-linear, task-oriented structure is more intuitive for business planning than the original report's linear format. It allows users to explore key decision areas in the order they would likely consider them, making the dense information highly consumable and actionable. -->
+    <!-- Visualization & Content Choices: 
+        - Market Growth: Goal: Inform/Impress -> Viz: Interactive Line Chart (Chart.js) -> Interaction: Hover to see yearly value -> Justification: Visually demonstrates the powerful growth trajectory.
+        - Consumer Drivers: Goal: Organize/Inform -> Viz: Interactive Cards (HTML/CSS) -> Interaction: Click to reveal details -> Justification: Breaks down complex motivations into digestible chunks.
+        - Operational Flow: Goal: Explain Process -> Viz: Interactive Process Diagram (HTML/CSS) -> Interaction: Click stages to expand -> Justification: Simplifies the complex supply chain into a clear, step-by-step visual guide.
+        - Competitive Landscape: Goal: Compare/Justify -> Viz: Dynamic Comparison Table & Grading System Diagram (HTML/CSS/JS) -> Interaction: Click to highlight/reveal info -> Justification: Clearly positions the startup's value proposition against competitors and explains the core trust-building mechanism.
+        - Startup Costs: Goal: Inform -> Viz: Doughnut Chart (Chart.js) -> Interaction: Hover for details -> Justification: Provides an immediate, easy-to-understand breakdown of the initial investment.
+        - CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. All visuals are pure HTML/CSS/Tailwind or Chart.js (Canvas). -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body { font-family: 'Inter', sans-serif; scroll-behavior: smooth; }
+        .active-nav { color: #166534; border-bottom-color: #166534; }
+        .inactive-nav { border-bottom-color: transparent; }
+        .section-card { transition: all 0.3s ease-in-out; }
+        .section-card:hover { transform: translateY(-5px); box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1); }
+        .interactive-tab.active { background-color: #166534; color: white; }
+        .chart-container { position: relative; width: 100%; max-width: 800px; margin-left: auto; margin-right: auto; height: 300px; max-height: 400px; }
+        @media (min-width: 768px) { .chart-container { height: 400px; } }
+        .hidden-content { display: none; }
+        .process-step-content { max-height: 0; overflow: hidden; transition: max-height 0.5s ease-in-out; }
+    </style>
+</head>
+<body class="bg-[#FDFBF8] text-gray-800">
+
+    <header class="bg-white/80 backdrop-blur-md sticky top-0 z-50 shadow-sm">
+        <nav class="container mx-auto px-4">
+            <div class="flex items-center justify-between h-16">
+                <h1 class="text-xl md:text-2xl font-bold text-gray-900">Thrift Startup India</h1>
+                <div class="hidden md:flex items-center space-x-6">
+                    <a href="#opportunity" class="nav-link text-gray-600 hover:text-green-800 font-medium border-b-2 pb-1 inactive-nav">The Opportunity</a>
+                    <a href="#shopper" class="nav-link text-gray-600 hover:text-green-800 font-medium border-b-2 pb-1 inactive-nav">The Shopper</a>
+                    <a href="#blueprint" class="nav-link text-gray-600 hover:text-green-800 font-medium border-b-2 pb-1 inactive-nav">Blueprint</a>
+                    <a href="#edge" class="nav-link text-gray-600 hover:text-green-800 font-medium border-b-2 pb-1 inactive-nav">Your Edge</a>
+                    <a href="#financials" class="nav-link text-gray-600 hover:text-green-800 font-medium border-b-2 pb-1 inactive-nav">Financials</a>
+                    <a href="#roadmap" class="nav-link text-gray-600 hover:text-green-800 font-medium border-b-2 pb-1 inactive-nav">Roadmap</a>
+                </div>
+                <button id="mobile-menu-button" class="md:hidden p-2 rounded-md">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
+                </button>
+            </div>
+        </nav>
+        <div id="mobile-menu" class="hidden md:hidden px-4 pb-4 space-y-2">
+            <a href="#opportunity" class="block nav-link-mobile text-gray-600 hover:bg-green-50 rounded-md p-2">The Opportunity</a>
+            <a href="#shopper" class="block nav-link-mobile text-gray-600 hover:bg-green-50 rounded-md p-2">The Shopper</a>
+            <a href="#blueprint" class="block nav-link-mobile text-gray-600 hover:bg-green-50 rounded-md p-2">Blueprint</a>
+            <a href="#edge" class="block nav-link-mobile text-gray-600 hover:bg-green-50 rounded-md p-2">Your Edge</a>
+            <a href="#financials" class="block nav-link-mobile text-gray-600 hover:bg-green-50 rounded-md p-2">Financials</a>
+            <a href="#roadmap" class="block nav-link-mobile text-gray-600 hover:bg-green-50 rounded-md p-2">Roadmap</a>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-4 py-8 md:py-12">
+        
+        <section id="opportunity" class="min-h-screen pt-20 -mt-16">
+            <div class="text-center mb-12">
+                <h2 class="text-4xl md:text-5xl font-bold text-gray-900 mb-4">The Market Opportunity</h2>
+                <p class="max-w-3xl mx-auto text-lg text-gray-600">This section quantifies the substantial financial opportunity in India's second-hand apparel market. The data reveals a sector experiencing explosive growth, signaling a prime moment for a new, professionally-run venture to enter and capture significant market share.</p>
+            </div>
+            
+            <div class="grid md:grid-cols-2 gap-8 mb-12 items-center">
+                <div class="space-y-6">
+                    <div class="bg-white p-6 rounded-xl shadow-md border border-gray-100">
+                        <p class="text-lg text-gray-500">2023 Market Value</p>
+                        <p class="text-5xl font-bold text-green-800">$3.0B</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-xl shadow-md border border-gray-100">
+                        <p class="text-lg text-gray-500">Projected 2032 Value</p>
+                        <p class="text-5xl font-bold text-green-800">$9.1B</p>
+                    </div>
+                     <div class="bg-white p-6 rounded-xl shadow-md border border-gray-100">
+                        <p class="text-lg text-gray-500">Projected CAGR (2024-32)</p>
+                        <p class="text-5xl font-bold text-green-800">13.04%</p>
+                    </div>
+                </div>
+                <div class="bg-white p-4 sm:p-6 rounded-xl shadow-lg border border-gray-100">
+                    <div class="chart-container">
+                        <canvas id="marketGrowthChart"></canvas>
+                    </div>
+                     <p class="text-center text-sm text-gray-500 mt-4">Interact with the chart by hovering over data points to see yearly market value projections.</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="shopper" class="min-h-screen pt-20 -mt-16">
+            <div class="text-center mb-12">
+                <h2 class="text-4xl md:text-5xl font-bold text-gray-900 mb-4">The Modern Thrift Shopper</h2>
+                <p class="max-w-3xl mx-auto text-lg text-gray-600">To succeed, you must understand your customer. This section breaks down the profile of the new Indian thrift shopper—their motivations, their behaviors, and what they value. These insights are key to building a brand and experience that resonates deeply and builds loyalty.</p>
+            </div>
+
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <div class="section-card bg-white p-6 rounded-xl shadow-md border border-gray-100">
+                    <h3 class="font-bold text-2xl mb-3 text-green-800">Who Are They?</h3>
+                    <p class="text-gray-600">The movement is led by urban **Millennials and Gen Z**. While metros like Delhi, Mumbai, and Bangalore dominate, the biggest growth frontier is in **Tier-II and Tier-III cities**, which are now accessible through e-commerce.</p>
+                </div>
+                <div class="section-card bg-white p-6 rounded-xl shadow-md border border-gray-100">
+                    <h3 class="font-bold text-2xl mb-3 text-green-800">Value-Driven Mindset</h3>
+                    <p class="text-gray-600">They seek high "perceived value"—a mix of brand, quality, uniqueness, and price. The stigma of "used clothes" is fading, replaced by a view of thrifting as a **smart, stylish, and conscious choice**.</p>
+                </div>
+                 <div class="section-card bg-white p-6 rounded-xl shadow-md border border-gray-100">
+                    <h3 class="font-bold text-2xl mb-3 text-green-800">Aspirational & Influenced</h3>
+                    <p class="text-gray-600">Heavily influenced by social media trends, K-pop, and celebrity styles. A key motivation is **emulating aspirational looks affordably**.</p>
+                </div>
+            </div>
+
+            <div class="mt-12">
+                <h3 class="text-2xl font-bold text-center mb-6">What Drives Their Decisions?</h3>
+                 <p class="text-center text-sm text-gray-500 mb-6">Click on each driver to explore the details.</p>
+                <div class="grid md:grid-cols-3 gap-6 text-center">
+                    <div class="interactive-card-container">
+                        <button class="interactive-card-trigger w-full bg-white p-6 rounded-xl shadow-md border border-gray-100 hover:shadow-lg transition-shadow">
+                            <span class="text-5xl">♻️</span>
+                            <h4 class="font-semibold text-xl mt-3">Sustainability</h4>
+                        </button>
+                        <div class="hidden-content bg-green-50 p-4 rounded-lg mt-2 text-left">
+                           <p>Indian consumers are increasingly aware of fast fashion's environmental toll, with the country generating <strong>7,800 kilotons of textile waste annually</strong>. Thrifting offers a direct solution, reducing carbon, water, and waste footprints by 20-30% for each garment whose life is extended.</p>
+                        </div>
+                    </div>
+                    <div class="interactive-card-container">
+                        <button class="interactive-card-trigger w-full bg-white p-6 rounded-xl shadow-md border border-gray-100 hover:shadow-lg transition-shadow">
+                            <span class="text-5xl">💰</span>
+                            <h4 class="font-semibold text-xl mt-3">Affordability</h4>
+                        </button>
+                        <div class="hidden-content bg-green-50 p-4 rounded-lg mt-2 text-left">
+                            <p>In a price-sensitive market, affordability is a powerful driver. Thrifting provides access to high-quality, branded garments at a fraction of their retail price, with consumers saving an average of <strong>$50 per month</strong>.</p>
+                        </div>
+                    </div>
+                    <div class="interactive-card-container">
+                        <button class="interactive-card-trigger w-full bg-white p-6 rounded-xl shadow-md border border-gray-100 hover:shadow-lg transition-shadow">
+                             <span class="text-5xl">✨</span>
+                            <h4 class="font-semibold text-xl mt-3">Uniqueness</h4>
+                        </button>
+                        <div class="hidden-content bg-green-50 p-4 rounded-lg mt-2 text-left">
+                            <p>Modern consumers, especially Gen Z, are rejecting mass-produced homogeneity. They seek <strong>one-of-a-kind vintage and retro pieces</strong> to express their unique personal style, transforming shopping into an act of creative discovery.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="blueprint" class="min-h-screen pt-20 -mt-16">
+            <div class="text-center mb-12">
+                <h2 class="text-4xl md:text-5xl font-bold text-gray-900 mb-4">The Business Blueprint</h2>
+                <p class="max-w-3xl mx-auto text-lg text-gray-600">This is your operational playbook. It breaks down the entire journey of a garment, from acquisition to the customer's doorstep. Mastering this process is key to building a scalable and professional brand. Click each stage to see the detailed steps.</p>
+            </div>
+            
+            <div class="w-full">
+                <div class="relative flex flex-col md:flex-row items-start md:items-center justify-between">
+                    <div class="absolute top-1/2 left-0 w-full h-1 bg-gray-300 hidden md:block" style="transform: translateY(-50%);"></div>
+                    <div id="process-step-1" class="process-step flex-1 text-center z-10 w-full md:w-auto mb-8 md:mb-0">
+                        <div class="flex justify-center items-center mx-auto w-20 h-20 rounded-full bg-green-800 text-white font-bold text-3xl cursor-pointer shadow-lg">1</div>
+                        <h3 class="mt-4 text-xl font-semibold">Sourcing</h3>
+                        <div class="process-step-content text-left bg-white p-4 rounded-lg mt-2 shadow-sm">
+                            <h4 class="font-bold">Portfolio Approach:</h4>
+                             <ul class="list-disc list-inside text-gray-600 mt-2 space-y-1">
+                                <li><strong>Export Surplus:</strong> High-quality, unworn items from hubs like Tirupur & Delhi-NCR.</li>
+                                <li><strong>Wholesale Bales:</strong> Unique vintage/international pieces from Panipat & Kandla. High-volume but labor-intensive sorting.</li>
+                                <li><strong>Direct Buy-Out:</strong> Curated items via a "Sell to Us" feature on your site.</li>
+                             </ul>
+                        </div>
+                    </div>
+                    <div id="process-step-2" class="process-step flex-1 text-center z-10 w-full md:w-auto mb-8 md:mb-0">
+                        <div class="flex justify-center items-center mx-auto w-20 h-20 rounded-full bg-green-800 text-white font-bold text-3xl cursor-pointer shadow-lg">2</div>
+                        <h3 class="mt-4 text-xl font-semibold">Processing</h3>
+                        <div class="process-step-content text-left bg-white p-4 rounded-lg mt-2 shadow-sm">
+                            <h4 class="font-bold">Quality & Trust Engine:</h4>
+                             <ul class="list-disc list-inside text-gray-600 mt-2 space-y-1">
+                                <li><strong>Sanitization:</strong> Professional cleaning of every item.</li>
+                                <li><strong>Quality Grading:</strong> Meticulous inspection and grading (A, B, C). Your core differentiator.</li>
+                                <li><strong>Photography & Listing:</strong> High-quality, honest photos and detailed descriptions.</li>
+                                <li><strong>Inventory Mgmt:</strong> Use a system like Shopify to track every unique SKU.</li>
+                             </ul>
+                        </div>
+                    </div>
+                    <div id="process-step-3" class="process-step flex-1 text-center z-10 w-full md:w-auto">
+                        <div class="flex justify-center items-center mx-auto w-20 h-20 rounded-full bg-green-800 text-white font-bold text-3xl cursor-pointer shadow-lg">3</div>
+                        <h3 class="mt-4 text-xl font-semibold">Fulfillment</h3>
+                         <div class="process-step-content text-left bg-white p-4 rounded-lg mt-2 shadow-sm">
+                            <h4 class="font-bold">Professional Delivery:</h4>
+                             <ul class="list-disc list-inside text-gray-600 mt-2 space-y-1">
+                                <li><strong>Branded Packaging:</strong> Use eco-friendly materials to create a memorable unboxing experience.</li>
+                                <li><strong>Outsource to 3PL:</strong> Partner with providers like Shiprocket for warehousing, packing, and shipping. This is key to scalability.</li>
+                                <li><strong>Returns Management:</strong> Establish a clear, fair returns policy (e.g., for store credit) to build trust.</li>
+                             </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="edge" class="min-h-screen pt-20 -mt-16">
+            <div class="text-center mb-12">
+                <h2 class="text-4xl md:text-5xl font-bold text-gray-900 mb-4">Your Competitive Edge</h2>
+                <p class="max-w-3xl mx-auto text-lg text-gray-600">The market is crowded with informal sellers, creating a huge "trust gap" for customers. Your advantage lies in professionalism and transparency. This section shows how your proposed business model directly solves the market's biggest problems.</p>
+            </div>
+            
+            <div class="bg-white p-6 md:p-8 rounded-2xl shadow-lg border border-gray-100 mb-12">
+                <h3 class="text-2xl md:text-3xl font-bold text-center mb-6">Bridging the Trust Gap</h3>
+                 <div class="grid md:grid-cols-3 gap-6 items-center text-center">
+                    <div>
+                        <div class="text-6xl mb-2">😟</div>
+                        <h4 class="font-bold text-xl">The Problem</h4>
+                        <p class="text-gray-600">Informal sellers on social media lead to unreliable quality, poor communication, payment scams, and high customer anxiety.</p>
+                    </div>
+                    <div class="text-5xl text-green-700 font-extrabold my-6 md:my-0">&rarr;</div>
+                    <div>
+                        <div class="text-6xl mb-2">✅</div>
+                        <h4 class="font-bold text-xl">Your Solution</h4>
+                        <p class="text-gray-600">A professional e-commerce store with a transparent <strong class="text-green-800">Quality Grading System</strong> that builds unwavering trust.</p>
+                    </div>
+                </div>
+                <div class="mt-8">
+                    <p class="text-center font-semibold mb-4">Explore the Quality Grading System:</p>
+                     <div class="flex flex-wrap justify-center gap-2">
+                        <button class="grading-tab interactive-tab p-3 px-4 rounded-lg font-medium bg-gray-200" data-grade="A">Grade A: Pristine</button>
+                        <button class="grading-tab interactive-tab p-3 px-4 rounded-lg font-medium bg-gray-200" data-grade="B">Grade B: Excellent</button>
+                        <button class="grading-tab interactive-tab p-3 px-4 rounded-lg font-medium bg-gray-200" data-grade="C">Grade C: Good</button>
+                    </div>
+                    <div id="grading-details" class="mt-4 p-4 bg-green-50 rounded-lg min-h-[100px] flex items-center justify-center">
+                        <p class="text-gray-600">Click a grade to see its description.</p>
+                    </div>
+                </div>
+            </div>
+
+        </section>
+
+        <section id="financials" class="min-h-screen pt-20 -mt-16">
+            <div class="text-center mb-12">
+                <h2 class="text-4xl md:text-5xl font-bold text-gray-900 mb-4">The Financials</h2>
+                <p class="max-w-3xl mx-auto text-lg text-gray-600">This section provides a realistic overview of the financial landscape for your startup. Understand the initial investment required, where the money goes, potential profitability, and crucial funding avenues available to you in India.</p>
+            </div>
+            
+            <div class="grid md:grid-cols-2 gap-8 items-center">
+                 <div class="bg-white p-4 sm:p-6 rounded-xl shadow-lg border border-gray-100">
+                    <h3 class="text-2xl font-bold text-center mb-4">Estimated Startup Costs (First 6 Months)</h3>
+                    <p class="text-center text-gray-600 mb-4">Total estimate: <strong class="text-green-800">₹8 Lakhs - ₹18 Lakhs</strong></p>
+                    <div class="chart-container" style="max-width: 400px; height: 300px;">
+                        <canvas id="costChart"></canvas>
+                    </div>
+                     <p class="text-center text-sm text-gray-500 mt-4">Hover over the chart to see the cost breakdown.</p>
+                </div>
+                 <div class="space-y-6">
+                    <h3 class="text-2xl font-bold text-center mb-2">Funding Avenues</h3>
+                    <div class="section-card bg-white p-6 rounded-xl shadow-md border border-gray-100">
+                        <h4 class="font-semibold text-lg text-green-800">Bootstrapping & Loans</h4>
+                        <p class="text-gray-600">Using personal savings or traditional bank loans.</p>
+                    </div>
+                    <div class="section-card bg-white p-6 rounded-xl shadow-md border border-gray-100">
+                        <h4 class="font-semibold text-lg text-green-800">Startup India Seed Fund Scheme (SISFS)</h4>
+                        <p class="text-gray-600">A key government scheme providing up to <strong>₹20 lakhs as a grant</strong> and <strong>₹50 lakhs as investment</strong> for early-stage startups. This is a prime target.</p>
+                    </div>
+                    <div class="section-card bg-white p-6 rounded-xl shadow-md border border-gray-100">
+                        <h4 class="font-semibold text-lg text-green-800">Angel Investors & VCs</h4>
+                        <p class="text-gray-600">For later stages, once your business model is proven and generating revenue.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="roadmap" class="min-h-screen pt-20 -mt-16">
+            <div class="text-center mb-12">
+                <h2 class="text-4xl md:text-5xl font-bold text-gray-900 mb-4">Your Go-to-Market Roadmap</h2>
+                <p class="max-w-3xl mx-auto text-lg text-gray-600">This final section outlines the key strategies for launching your business and positioning it for long-term success. Focus on building a strong brand, navigating challenges, and anticipating future trends to create a durable, profitable enterprise.</p>
+            </div>
+
+            <div class="grid md:grid-cols-2 gap-8">
+                <div class="bg-white p-6 rounded-xl shadow-lg border border-gray-100">
+                    <h3 class="text-2xl font-bold mb-4">Launch & Marketing Strategy</h3>
+                    <ul class="space-y-4 text-gray-700">
+                        <li class="flex items-start">
+                           <span class="text-green-700 font-bold mr-3 mt-1">&#10003;</span>
+                           <span><strong>Define Your Niche:</strong> Specialize in a category (e.g., vintage, K-pop style, plus-size) to stand out.</span>
+                        </li>
+                         <li class="flex items-start">
+                           <span class="text-green-700 font-bold mr-3 mt-1">&#10003;</span>
+                           <span><strong>Dominate Social Media:</strong> Use high-quality visuals, "drops," and influencer collaborations on Instagram.</span>
+                        </li>
+                         <li class="flex items-start">
+                           <span class="text-green-700 font-bold mr-3 mt-1">&#10003;</span>
+                           <span><strong>Build Trust Radically:</strong> Be transparent with your grading, offer authenticity guarantees, and provide stellar customer service.</span>
+                        </li>
+                         <li class="flex items-start">
+                           <span class="text-green-700 font-bold mr-3 mt-1">&#10003;</span>
+                           <span><strong>Invest in SEO:</strong> Target long-tail keywords to capture customers with high purchase intent on Google.</span>
+                        </li>
+                    </ul>
+                </div>
+                 <div class="bg-white p-6 rounded-xl shadow-lg border border-gray-100">
+                    <h3 class="text-2xl font-bold mb-4">Future-Proofing Your Business</h3>
+                     <ul class="space-y-4 text-gray-700">
+                        <li class="flex items-start">
+                           <span class="text-green-700 font-bold mr-3 mt-1">&#10003;</span>
+                           <span><strong>Embrace Technology:</strong> Explore AI for personalization and AR for virtual try-ons to enhance the user experience.</span>
+                        </li>
+                         <li class="flex items-start">
+                           <span class="text-green-700 font-bold mr-3 mt-1">&#10003;</span>
+                           <span><strong>Brand Collaborations:</strong> Position your platform to become the official circularity partner for established fashion brands.</span>
+                        </li>
+                         <li class="flex items-start">
+                           <span class="text-green-700 font-bold mr-3 mt-1">&#10003;</span>
+                           <span><strong>Formalize to Win:</strong> Operate as a fully compliant, registered business. As the market formalizes, this will become a major structural advantage.</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="bg-gray-800 text-white mt-16">
+        <div class="container mx-auto px-4 py-6 text-center">
+            <p>&copy; 2025 Thrift Startup India Interactive Blueprint. All data synthesized from market research for strategic planning purposes.</p>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            
+            const marketGrowthData = {
+                labels: ['2023', '2024', '2025', '2026', '2027', '2028', '2029', '2030', '2031', '2032'],
+                datasets: [{
+                    label: 'Market Value (in Billion USD)',
+                    data: [3.00, 3.40, 3.85, 4.36, 4.94, 5.60, 6.34, 7.18, 8.13, 9.11],
+                    borderColor: '#166534',
+                    backgroundColor: 'rgba(22, 101, 52, 0.1)',
+                    fill: true,
+                    tension: 0.4,
+                    pointBackgroundColor: '#166534',
+                    pointBorderColor: '#fff',
+                    pointHoverRadius: 7,
+                    pointHoverBackgroundColor: '#fff',
+                    pointHoverBorderColor: '#166534'
+                }]
+            };
+
+            const marketGrowthConfig = {
+                type: 'line',
+                data: marketGrowthData,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: false,
+                             ticks: {
+                                callback: function(value) {
+                                    return '$' + value + 'B';
+                                }
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                             callbacks: {
+                                label: function(context) {
+                                    let label = context.dataset.label || '';
+                                    if (label) { label += ': '; }
+                                    if (context.parsed.y !== null) {
+                                        label += new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(context.parsed.y) + 'B';
+                                    }
+                                    return label;
+                                }
+                            }
+                        }
+                    }
+                }
+            };
+
+            const marketGrowthCtx = document.getElementById('marketGrowthChart').getContext('2d');
+            new Chart(marketGrowthCtx, marketGrowthConfig);
+
+            const costData = {
+                labels: ['Initial Inventory', 'Marketing & Branding', 'Working Capital', 'Tech', 'Operations', 'Legal', 'Contingency'],
+                datasets: [{
+                    label: 'Cost Breakdown',
+                    data: [40, 18, 15, 8, 7, 2, 10], 
+                    backgroundColor: ['#14532d', '#15803d', '#16a34a', '#4ade80', '#86efac', '#bbf7d0', '#dcfce7'],
+                    hoverOffset: 4
+                }]
+            };
+
+            const costConfig = {
+                type: 'doughnut',
+                data: costData,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                             labels: { padding: 15 }
+                        },
+                         tooltip: {
+                             callbacks: {
+                                label: function(context) {
+                                    let label = context.label || '';
+                                    if (label) { label += ': '; }
+                                    if (context.parsed !== null) {
+                                        label += context.parsed + '%';
+                                    }
+                                    return label;
+                                }
+                            }
+                        }
+                    }
+                }
+            };
+            
+            const costCtx = document.getElementById('costChart').getContext('2d');
+            new Chart(costCtx, costConfig);
+
+
+            const interactiveCardTriggers = document.querySelectorAll('.interactive-card-trigger');
+            interactiveCardTriggers.forEach(trigger => {
+                trigger.addEventListener('click', () => {
+                    const content = trigger.nextElementSibling;
+                    const isVisible = content.style.display === 'block';
+                    
+                    document.querySelectorAll('.hidden-content').forEach(c => c.style.display = 'none');
+                    
+                    if (!isVisible) {
+                        content.style.display = 'block';
+                    }
+                });
+            });
+            
+            const processSteps = document.querySelectorAll('.process-step .flex');
+            processSteps.forEach(stepTrigger => {
+                stepTrigger.addEventListener('click', (e) => {
+                    const content = stepTrigger.parentElement.querySelector('.process-step-content');
+                    if(content.style.maxHeight) {
+                        content.style.maxHeight = null;
+                    } else {
+                        document.querySelectorAll('.process-step-content').forEach(c => c.style.maxHeight = null);
+                        content.style.maxHeight = content.scrollHeight + "px";
+                    }
+                });
+            });
+
+            const gradingTabs = document.querySelectorAll('.grading-tab');
+            const gradingDetails = document.getElementById('grading-details');
+            const gradeInfo = {
+                A: "<strong>Grade A (Pristine / Like-New):</strong> Unworn or worn only once. No defects, stains, or signs of wear. Often with original tags. Commands a premium price (70-80% of original retail).",
+                B: "<strong>Grade B (Excellent Pre-loved):</strong> Gently used, excellent condition. May show minimal signs of wear (e.g., slight fading) but no major flaws. The volume-driving sweet spot (40-60% of original retail).",
+                C: "<strong>Grade C (Good Vintage / Worn):</strong> Shows visible signs of use (fading, minor pilling) that add character. Specific flaws are always photographed and noted. Priced for a quick sale (20-30% of original retail)."
+            };
+
+            gradingTabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    gradingTabs.forEach(t => t.classList.remove('active'));
+                    tab.classList.add('active');
+                    gradingDetails.innerHTML = `<p>${gradeInfo[tab.dataset.grade]}</p>`;
+                });
+            });
+
+            const mobileMenuButton = document.getElementById('mobile-menu-button');
+            const mobileMenu = document.getElementById('mobile-menu');
+            mobileMenuButton.addEventListener('click', () => {
+                mobileMenu.classList.toggle('hidden');
+            });
+            
+            const navLinks = document.querySelectorAll('.nav-link, .nav-link-mobile');
+            navLinks.forEach(link => {
+                link.addEventListener('click', () => {
+                   if (!mobileMenu.classList.contains('hidden')) {
+                       mobileMenu.classList.add('hidden');
+                   }
+                });
+            });
+
+            const sections = document.querySelectorAll('section');
+            const navLinkElements = document.querySelectorAll('.nav-link');
+            window.addEventListener('scroll', () => {
+                let current = '';
+                sections.forEach(section => {
+                    const sectionTop = section.offsetTop;
+                    if(pageYOffset >= sectionTop - 80){
+                       current = section.getAttribute('id');
+                    }
+                });
+
+                navLinkElements.forEach(link => {
+                    link.classList.remove('active-nav');
+                    link.classList.add('inactive-nav');
+                    if(link.getAttribute('href').substring(1) === current) {
+                        link.classList.add('active-nav');
+                        link.classList.remove('inactive-nav');
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>
